@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltara Motors - Strategy Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .team-info h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .team-info .team-subtitle {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .year-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .year-tab {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .year-tab.active {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .year-tab:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .year-tab.completed {
+            background: #27ae60;
+            border-color: #2ecc71;
+        }
+
+        .budget-display {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .budget-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .budget-remaining {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .year-section {
+            display: none;
+        }
+
+        .year-section.active {
+            display: block;
+        }
+
+        .category-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #3498db;
+        }
+
+        .category-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .decision-group {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .decision-group h4 {
+            color: #34495e;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .decision-option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .decision-option:hover {
+            border-color: #3498db;
+            background: #f8f9ff;
+        }
+
+        .decision-option.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .decision-option input[type="radio"] {
+            margin-right: 1rem;
+            transform: scale(1.2);
+        }
+
+        .option-details {
+            flex-grow: 1;
+        }
+
+        .option-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .option-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-cost {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .dependency-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .market-events {
+            background: #fff3cd;
+            border-left: 5px solid #f39c12;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .market-events.show {
+            display: block;
+        }
+
+        .market-events h3 {
+            color: #d68910;
+            margin-bottom: 1rem;
+        }
+
+        .event-item {
+            background: white;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .event-title {
+            font-weight: bold;
+            color: #d68910;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-corrections {
+            background: #fdf2e9;
+            border-left: 5px solid #e67e22;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .course-corrections.show {
+            display: block;
+        }
+
+        .correction-option {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border: 2px solid #ecf0f1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .correction-option:hover {
+            border-color: #e67e22;
+        }
+
+        .game-actions {
+            background: #2c3e50;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .auto-save-indicator {
+            color: #27ae60;
+            font-size: 0.9rem;
+        }
+
+        .results-section {
+            display: none;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .kpi-change {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .kpi-change.positive {
+            color: #27ae60;
+        }
+
+        .kpi-change.negative {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .year-tabs {
+                justify-content: center;
+            }
+
+            .game-actions {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="team-info">
+                <h2 id="teamName">Loading...</h2>
+                <div class="team-subtitle">Voltara Motors Strategy Simulation</div>
+            </div>
+            
+            <div class="year-tabs">
+                <button class="year-tab active" data-year="1">Year 1</button>
+                <button class="year-tab" data-year="2">Year 2</button>
+                <button class="year-tab" data-year="3">Year 3</button>
+                <button class="year-tab" data-year="4">Year 4</button>
+            </div>
+            
+            <div class="budget-display">
+                <div class="budget-amount">₹<span id="budgetUsed">0</span>/₹100 Cr</div>
+                <div class="budget-remaining">Remaining: ₹<span id="budgetRemaining">100</span> Cr</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Year 1 Section -->
+            <div class="year-section active" id="year1">
+                <h2>Year 1: Foundation Building</h2>
+                
+                <!-- Platform & Manufacturing IT -->
+                <div class="category-section">
+                    <h3>🏭 A. Platform & Manufacturing IT</h3>
+                    
+                    <div class="decision-group">
+                        <h4>Smart Factory Strategy</h4>
+                        <div class="decision-option" onclick="selectOption('smartFactory', 'industry4', 35)">
+                            <input type="radio" name="smartFactory_year1" value="industry4" data-cost="35">
+                            <div class="option-details">
+                                <div class="option-title">Industry 4.0 Smart Factory</div>
+                                <div class="option-description">Full digital transformation: IoT sensors, AI-driven production, predictive maintenance</div>
+                                <div class="option-cost">₹35 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('smartFactory', 'incremental', 20)">
+                            <input type="radio" name="smartFactory_year1" value="incremental" data-cost="20">
+                            <div class="option-details">
+                                <div class="option-title">Incremental Automation</div>
+                                <div class="option-description">Selective automation: Key production lines, basic digitization</div>
+                                <div class="option-cost">₹20 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('smartFactory', 'legacy', 8)">
+                            <input type="radio" name="smartFactory_year1" value="legacy" data-cost="8">
+                            <div class="option-details">
+                                <div class="option-title">Status Quo Legacy</div>
+                                <div class="option-description">Minimal upgrades: Basic maintenance, traditional manufacturing</div>
+                                <div class="option-cost">₹8 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Quality Systems</h4>
+                        <div class="decision-option" onclick="selectOption('qualitySystem', 'automated', 18)">
+                            <input type="radio" name="qualitySystem_year1" value="automated" data-cost="18">
+                            <div class="option-details">
+                                <div class="option-title">Automated QC</div>
+                                <div class="option-description">Computer vision, AI inspection, real-time quality monitoring</div>
+                                <div class="option-cost">₹18 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('qualitySystem', 'hybrid', 12)">
+                            <input type="radio" name="qualitySystem_year1" value="hybrid" data-cost="12">
+                            <div class="option-details">
+                                <div class="option-title">Manual + Digital Hybrid</div>
+                                <div class="option-description">Digital quality records with human inspection</div>
+                                <div class="option-cost">₹12 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('qualitySystem', 'manual', 5)">
+                            <input type="radio" name="qualitySystem_year1" value="manual" data-cost="5">
+                            <div class="option-details">
+                                <div class="option-title">Status Quo Manual</div>
+                                <div class="option-description">Traditional quality control processes</div>
+                                <div class="option-cost">₹5 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Experience & Sales Tech -->
+                <div class="category-section">
+                    <h3>👥 B. Customer Experience & Sales Tech</h3>
+                    
+                    <div class="decision-group">
+                        <h4>Customer Journey</h4>
+                        <div class="decision-option" onclick="selectOption('customerJourney', 'omnichannel', 25)">
+                            <input type="radio" name="customerJourney_year1" value="omnichannel" data-cost="25">
+                            <div class="option-details">
+                                <div class="option-title">Omnichannel Experience</div>
+                                <div class="option-description">Unified online-offline experience, mobile app, VR showrooms</div>
+                                <div class="option-cost">₹25 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('customerJourney', 'channelSpecific', 15)">
+                            <input type="radio" name="customerJourney_year1" value="channelSpecific" data-cost="15">
+                            <div class="option-details">
+                                <div class="option-title">Channel-Specific</div>
+                                <div class="option-description">Separate digital and dealer experiences</div>
+                                <div class="option-cost">₹15 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('customerJourney', 'basic', 8)">
+                            <input type="radio" name="customerJourney_year1" value="basic" data-cost="8">
+                            <div class="option-details">
+                                <div class="option-title">Basic Digitization</div>
+                                <div class="option-description">Simple website and basic dealer tools</div>
+                                <div class="option-cost">₹8 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Service Network</h4>
+                        <div class="decision-option" onclick="selectOption('serviceNetwork', 'predictive', 20)">
+                            <input type="radio" name="serviceNetwork_year1" value="predictive" data-cost="20">
+                            <div class="option-details">
+                                <div class="option-title">Predictive Integrated Business Planning</div>
+                                <div class="option-description">AI-driven service prediction, integrated supply chain</div>
+                                <div class="option-cost">₹20 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('serviceNetwork', 'reactive', 12)">
+                            <input type="radio" name="serviceNetwork_year1" value="reactive" data-cost="12">
+                            <div class="option-details">
+                                <div class="option-title">Reactive Digital</div>
+                                <div class="option-description">Digital service booking, basic diagnostics</div>
+                                <div class="option-cost">₹12 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('serviceNetwork', 'scheduled', 6)">
+                            <input type="radio" name="serviceNetwork_year1" value="scheduled" data-cost="6">
+                            <div class="option-details">
+                                <div class="option-title">Scheduled Traditional</div>
+                                <div class="option-description">Calendar-based service appointments</div>
+                                <div class="option-cost">₹6 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enterprise Applications & Data -->
+                <div class="category-section">
+                    <h3>💼 C. Enterprise Applications & Data</h3>
+                    
+                    <div class="decision-group">
+                        <h4>ERP Strategy</h4>
+                        <div class="decision-option" onclick="selectOption('erpStrategy', 'sapRise', 22)">
+                            <input type="radio" name="erpStrategy_year1" value="sapRise" data-cost="22">
+                            <div class="option-details">
+                                <div class="option-title">SAP RISE (Managed Cloud)</div>
+                                <div class="option-description">Cloud-native ERP, automatic updates, AI capabilities</div>
+                                <div class="option-cost">₹22 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('erpStrategy', 'sapOnPrem', 28)">
+                            <input type="radio" name="erpStrategy_year1" value="sapOnPrem" data-cost="28">
+                            <div class="option-details">
+                                <div class="option-title">SAP On-Premise</div>
+                                <div class="option-description">Traditional ERP with full control, higher maintenance</div>
+                                <div class="option-cost">₹28 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('erpStrategy', 'legacy', 10)">
+                            <input type="radio" name="erpStrategy_year1" value="legacy" data-cost="10">
+                            <div class="option-details">
+                                <div class="option-title">Legacy System Enhancement</div>
+                                <div class="option-description">Upgrade existing systems, limited new capabilities</div>
+                                <div class="option-cost">₹10 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Data Platform</h4>
+                        <div class="decision-option" onclick="selectOption('dataPlatform', 'lakehouse', 25)">
+                            <input type="radio" name="dataPlatform_year1" value="lakehouse" data-cost="25">
+                            <div class="option-details">
+                                <div class="option-title">Enterprise Data Lakehouse</div>
+                                <div class="option-description">Unified analytics platform, real-time insights, ML capabilities</div>
+                                <div class="option-cost">₹25 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('dataPlatform', 'warehouse', 15)">
+                            <input type="radio" name="dataPlatform_year1" value="warehouse" data-cost="15">
+                            <div class="option-details">
+                                <div class="option-title">Traditional Data Warehouse</div>
+                                <div class="option-description">Structured reporting, historical analytics</div>
+                                <div class="option-cost">₹15 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('dataPlatform', 'basic', 7)">
+                            <input type="radio" name="dataPlatform_year1" value="basic" data-cost="7">
+                            <div class="option-details">
+                                <div class="option-title">Basic Reporting Systems</div>
+                                <div class="option-description">Simple dashboards, manual reporting</div>
+                                <div class="option-cost">₹7 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics & Intelligence -->
+                <div class="category-section">
+                    <h3>📊 D. Analytics & Intelligence</h3>
+                    
+                    <div class="decision-group">
+                        <h4>IoT & Telemetry</h4>
+                        <div class="decision-option" onclick="selectOption('iotTelemetry', 'realtime', 30)">
+                            <input type="radio" name="iotTelemetry_year1" value="realtime" data-cost="30">
+                            <div class="option-details">
+                                <div class="option-title">Real-time Vehicle Data</div>
+                                <div class="option-description">Connected cars, over-the-air updates, usage analytics</div>
+                                <div class="option-cost">₹30 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('iotTelemetry', 'basic', 18)">
+                            <input type="radio" name="iotTelemetry_year1" value="basic" data-cost="18">
+                            <div class="option-details">
+                                <div class="option-title">Basic Diagnostics</div>
+                                <div class="option-description">Standard OBD diagnostics, basic connectivity</div>
+                                <div class="option-cost">₹18 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('iotTelemetry', 'none', 3)">
+                            <input type="radio" name="iotTelemetry_year1" value="none" data-cost="3">
+                            <div class="option-details">
+                                <div class="option-title">None</div>
+                                <div class="option-description">Traditional vehicles, no connectivity features</div>
+                                <div class="option-cost">₹3 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Business Intelligence</h4>
+                        <div class="decision-option" onclick="selectOption('businessIntelligence', 'generative', 20)">
+                            <input type="radio" name="businessIntelligence_year1" value="generative" data-cost="20">
+                            <div class="option-details">
+                                <div class="option-title">Generative BI</div>
+                                <div class="option-description">AI-powered insights, natural language queries, predictive analytics</div>
+                                <div class="option-cost">₹20 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('businessIntelligence', 'standard', 12)">
+                            <input type="radio" name="businessIntelligence_year1" value="standard" data-cost="12">
+                            <div class="option-details">
+                                <div class="option-title">Standard BI</div>
+                                <div class="option-description">Traditional dashboards, standard reporting</div>
+                                <div class="option-cost">₹12 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('businessIntelligence', 'manual', 4)">
+                            <input type="radio" name="businessIntelligence_year1" value="manual" data-cost="4">
+                            <div class="option-details">
+                                <div class="option-title">Manual Reporting</div>
+                                <div class="option-description">Excel-based reporting, basic charts</div>
+                                <div class="option-cost">₹4 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marketing & Brand -->
+                <div class="category-section">
+                    <h3>🎯 E. Marketing & Brand</h3>
+                    
+                    <div class="decision-group">
+                        <h4>Brand Positioning</h4>
+                        <div class="decision-option" onclick="selectOption('brandPositioning', 'tesla', 30)">
+                            <input type="radio" name="brandPositioning_year1" value="tesla" data-cost="30">
+                            <div class="option-details">
+                                <div class="option-title">Tesla-like Innovation</div>
+                                <div class="option-description">Tech-first brand, direct customer engagement, innovation focus</div>
+                                <div class="option-cost">₹30 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('brandPositioning', 'toyota', 20)">
+                            <input type="radio" name="brandPositioning_year1" value="toyota" data-cost="20">
+                            <div class="option-details">
+                                <div class="option-title">Toyota-like Reliability</div>
+                                <div class="option-description">Trust-based brand, proven technology, quality emphasis</div>
+                                <div class="option-cost">₹20 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('brandPositioning', 'value', 12)">
+                            <input type="radio" name="brandPositioning_year1" value="value" data-cost="12">
+                            <div class="option-details">
+                                <div class="option-title">Value Leadership</div>
+                                <div class="option-description">Price-focused positioning, affordability message</div>
+                                <div class="option-cost">₹12 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Marketing Tech</h4>
+                        <div class="decision-option" onclick="selectOption('marketingTech', 'aiPersonalization', 22)">
+                            <input type="radio" name="marketingTech_year1" value="aiPersonalization" data-cost="22">
+                            <div class="option-details">
+                                <div class="option-title">AI Personalization</div>
+                                <div class="option-description">Dynamic pricing, personalized recommendations, behavioral targeting</div>
+                                <div class="option-cost">₹22 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('marketingTech', 'traditional', 14)">
+                            <input type="radio" name="marketingTech_year1" value="traditional" data-cost="14">
+                            <div class="option-details">
+                                <div class="option-title">Traditional Digital</div>
+                                <div class="option-description">Standard digital marketing, social media, SEO</div>
+                                <div class="option-cost">₹14 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('marketingTech', 'wordOfMouth', 8)">
+                            <input type="radio" name="marketingTech_year1" value="wordOfMouth" data-cost="8">
+                            <div class="option-details">
+                                <div class="option-title">Word-of-Mouth/Influence-led</div>
+                                <div class="option-description">Referral programs, influencer partnerships, community building</div>
+                                <div class="option-cost">₹8 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infrastructure & Security -->
+                <div class="category-section">
+                    <h3>🔧 F. Infrastructure & Security</h3>
+                    
+                    <div class="decision-group">
+                        <h4>Cloud Strategy</h4>
+                        <div class="decision-option" onclick="selectOption('cloudStrategy', 'multiCloud', 18)">
+                            <input type="radio" name="cloudStrategy_year1" value="multiCloud" data-cost="18">
+                            <div class="option-details">
+                                <div class="option-title">Multi-cloud</div>
+                                <div class="option-description">AWS + Azure/GCP, best-of-breed services, vendor independence</div>
+                                <div class="option-cost">₹18 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('cloudStrategy', 'singleCloud', 12)">
+                            <input type="radio" name="cloudStrategy_year1" value="singleCloud" data-cost="12">
+                            <div class="option-details">
+                                <div class="option-title">Single Cloud</div>
+                                <div class="option-description">Single provider (AWS/Azure), simpler management</div>
+                                <div class="option-cost">₹12 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('cloudStrategy', 'hybrid', 15)">
+                            <input type="radio" name="cloudStrategy_year1" value="hybrid" data-cost="15">
+                            <div class="option-details">
+                                <div class="option-title">Hybrid</div>
+                                <div class="option-description">Cloud + on-premise mix, gradual migration</div>
+                                <div class="option-cost">₹15 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('cloudStrategy', 'onPremise', 20)">
+                            <input type="radio" name="cloudStrategy_year1" value="onPremise" data-cost="20">
+                            <div class="option-details">
+                                <div class="option-title">On-premise</div>
+                                <div class="option-description">Traditional data centers, full control, higher maintenance</div>
+                                <div class="option-cost">₹20 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decision-group">
+                        <h4>Security</h4>
+                        <div class="decision-option" onclick="selectOption('security', 'zeroTrust', 16)">
+                            <input type="radio" name="security_year1" value="zeroTrust" data-cost="16">
+                            <div class="option-details">
+                                <div class="option-title">Zero-trust Architecture</div>
+                                <div class="option-description">Modern security model, identity-based access, micro-segmentation</div>
+                                <div class="option-cost">₹16 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('security', 'perimeter', 10)">
+                            <input type="radio" name="security_year1" value="perimeter" data-cost="10">
+                            <div class="option-details">
+                                <div class="option-title">Perimeter Security</div>
+                                <div class="option-description">Traditional firewall-based security</div>
+                                <div class="option-cost">₹10 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('security', 'hybrid', 13)">
+                            <input type="radio" name="security_year1" value="hybrid" data-cost="13">
+                            <div class="option-details">
+                                <div class="option-title">Hybrid Approach</div>
+                                <div class="option-description">Mix of modern and traditional security</div>
+                                <div class="option-cost">₹13 Cr</div>
+                            </div>
+                        </div>
+                        
+                        <div class="decision-option" onclick="selectOption('security', 'basic', 6)">
+                            <input type="radio" name="security_year1" value="basic" data-cost="6">
+                            <div class="option-details">
+                                <div class="option-title">Basic Protection</div>
+                                <div class="option-description">Standard antivirus and basic firewalls</div>
+                                <div class="option-cost">₹6 Cr</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dependency-warning" id="dependencyWarning">
+                    <strong>⚠️ Dependency Violation:</strong>
+                    <div id="dependencyMessage"></div>
+                </div>
+            </div>
+
+            <!-- Placeholder sections for Years 2-4 -->
+            <div class="year-section" id="year2">
+                <h2>Year 2: Market Events & Course Corrections</h2>
+                <div class="market-events" id="marketEventsYear2">
+                    <h3>🌍 Market Events</h3>
+                    <div id="eventsYear2Content">Loading market events...</div>
+                </div>
+                
+                <div class="course-corrections" id="courseCorrectionsYear2">
+                    <h3>🔄 Course Corrections Available</h3>
+                    <p>Based on Year 1 performance and market events, you can make strategic adjustments:</p>
+                    <div id="correctionsYear2Content">Loading correction options...</div>
+                </div>
+                
+                <p>Year 2 decisions will be available after completing Year 1.</p>
+            </div>
+
+            <div class="year-section" id="year3">
+                <h2>Year 3: Interconnected Market Impacts</h2>
+                <p>Year 3 decisions will be available after completing Year 2.</p>
+            </div>
+
+            <div class="year-section" id="year4">
+                <h2>Year 4: Maximum Complexity</h2>
+                <p>Year 4 decisions will be available after completing Year 3.</p>
+            </div>
+
+            <div class="results-section" id="finalResults">
+                <h2>🏆 Final Results</h2>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-title">Market Share</div>
+                        <div class="kpi-value"><span id="finalMarketShare">--</span>%</div>
+                        <div class="kpi-change" id="marketShareChange">--</div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-title">Revenue</div>
+                        <div class="kpi-value">₹<span id="finalRevenue">--</span>Cr</div>
+                        <div class="kpi-change" id="revenueChange">--</div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-title">Profitability</div>
+                        <div class="kpi-value"><span id="finalProfitability">--</span>%</div>
+                        <div class="kpi-change" id="profitabilityChange">--</div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-title">Customer Satisfaction</div>
+                        <div class="kpi-value"><span id="finalSatisfaction">--</span>%</div>
+                        <div class="kpi-change" id="satisfactionChange">--</div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-title">ROIC</div>
+                        <div class="kpi-value"><span id="finalROIC">--</span>%</div>
+                        <div class="kpi-change" id="roicChange">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-actions">
+            <div class="auto-save-indicator" id="autoSaveStatus">
+                Auto-saved <span id="lastSaveTime">--</span>
+            </div>
+            
+            <div>
+                <button class="btn btn-secondary" onclick="goBack()">← Back to Landing</button>
+                <button class="btn btn-primary" onclick="saveProgress()" id="saveBtn">💾 Save Progress</button>
+                <button class="btn btn-success" onclick="submitYear()" id="submitBtn">✓ Complete Year 1</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration - Same as landing page
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "your-project-id.firebaseapp.com",
+            databaseURL: "https://your-project-id-default-rtdb.firebaseio.com/",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Game state
+        let currentTeam = null;
+        let currentYear = 1;
+        let gameData = {};
+        let currentDecisions = {};
+        let autoSaveInterval = null;
+
+        // Team names mapping
+        const teamNames = {
+            team1: "Alpha Automotive",
+            team2: "Beta Motors", 
+            team3: "Gamma Vehicles",
+            team4: "Delta Drive",
+            team5: "Epsilon Electric",
+            team6: "Zeta Motors",
+            team7: "Eta Engines",
+            team8: "Theta Transport",
+            team9: "Iota Industries",
+            team10: "Kappa Cars"
+        };
+
+        // Initialize game when page loads
+        function initializeGame() {
+            // Get team from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            currentTeam = urlParams.get('team');
+            
+            if (!currentTeam || !teamNames[currentTeam]) {
+                alert('Invalid team access. Redirecting to landing page.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('teamName').textContent = teamNames[currentTeam];
+            
+            // Load existing game data
+            loadGameData();
+            
+            // Set up auto-save
+            startAutoSave();
+            
+            // Set up year tab switching
+            setupYearTabs();
+            
+            // Set up decision listeners
+            setupDecisionListeners();
+        }
+
+        function loadGameData() {
+            database.ref(`teams/${currentTeam}`).on('value', (snapshot) => {
+                gameData = snapshot.val() || {};
+                
+                if (gameData.currentYear) {
+                    currentYear = gameData.currentYear;
+                }
+                
+                // Load existing decisions
+                if (gameData.decisions && gameData.decisions[`year${currentYear}`]) {
+                    restoreDecisions(gameData.decisions[`year${currentYear}`]);
+                }
+                
+                updateBudgetDisplay();
+                updateYearTabs();
+            });
+        }
+
+        function setupYearTabs() {
+            document.querySelectorAll('.year-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const year = parseInt(this.dataset.year);
+                    if (year <= currentYear) {
+                        switchToYear(year);
+                    }
+                });
+            });
+        }
+
+        function switchToYear(year) {
+            // Hide all year sections
+            document.querySelectorAll('.year-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected year
+            document.getElementById(`year${year}`).classList.add('active');
+            
+            // Update active tab
+            document.querySelectorAll('.year-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (parseInt(tab.dataset.year) === year) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            currentYear = year;
+        }
+
+        function setupDecisionListeners() {
+            document.addEventListener('change', function(e) {
+                if (e.target.type === 'radio') {
+                    updateBudgetDisplay();
+                    checkDependencies();
+                    
+                    // Auto-save on decision change
+                    setTimeout(saveProgress, 1000);
+                }
+            });
+        }
+
+        function selectOption(category, value, cost) {
+            // Update the radio button
+            const radioName = `${category}_year${currentYear}`;
+            const radio = document.querySelector(`input[name="${radioName}"][value="${value}"]`);
+            if (radio) {
+                radio.checked = true;
+                
+                // Update visual selection
+                document.querySelectorAll(`input[name="${radioName}"]`).forEach(r => {
+                    r.closest('.decision-option').classList.remove('selected');
+                });
+                radio.closest('.decision-option').classList.add('selected');
+                
+                // Update current decisions object
+                currentDecisions[category] = {
+                    value: value,
+                    cost: cost
+                };
+                
+                updateBudgetDisplay();
+                checkDependencies();
+            }
+        }
+
+        function updateBudgetDisplay() {
+            let totalCost = 0;
+            
+            // Calculate total from all selected options
+            document.querySelectorAll(`input[type="radio"]:checked`).forEach(radio => {
+                if (radio.name.includes(`year${currentYear}`)) {
+                    totalCost += parseInt(radio.dataset.cost);
+                }
+            });
+            
+            const remaining = 100 - totalCost;
+            
+            document.getElementById('budgetUsed').textContent = totalCost;
+            document.getElementById('budgetRemaining').textContent = remaining;
+            
+            // Color coding
+            const budgetDisplay = document.querySelector('.budget-display');
+            if (totalCost > 100) {
+                budgetDisplay.style.background = 'rgba(231, 76, 60, 0.2)';
+            } else if (totalCost > 90) {
+                budgetDisplay.style.background = 'rgba(243, 156, 18, 0.2)';
+            } else {
+                budgetDisplay.style.background = 'rgba(255,255,255,0.1)';
+            }
+        }
+
+        function checkDependencies() {
+            const decisions = getCurrentDecisions();
+            const violations = [];
+            const warningDiv = document.getElementById('dependencyWarning');
+            
+            // Hard Dependencies
+            if (decisions.brandPositioning === 'tesla' && 
+                decisions.smartFactory !== 'industry4' && 
+                decisions.iotTelemetry !== 'realtime') {
+                violations.push('Tesla-like Innovation requires Industry 4.0 OR Real-time Vehicle Data');
+            }
+            
+            if (decisions.dataPlatform === 'lakehouse' && 
+                !['singleCloud', 'multiCloud', 'hybrid'].includes(decisions.cloudStrategy)) {
+                violations.push('Data Lakehouse requires Single/Multi/Hybrid Cloud');
+            }
+            
+            if (decisions.iotTelemetry === 'realtime' && 
+                (decisions.dataPlatform !== 'lakehouse' || 
+                 !['zeroTrust', 'hybrid'].includes(decisions.security))) {
+                violations.push('Real-time Vehicle Data requires Data Lakehouse + Zero-trust/Hybrid Security');
+            }
+            
+            if (decisions.businessIntelligence === 'generative' && 
+                decisions.dataPlatform !== 'lakehouse') {
+                violations.push('Generative BI requires Data Lakehouse');
+            }
+            
+            if (decisions.marketingTech === 'aiPersonalization' && 
+                decisions.dataPlatform !== 'lakehouse') {
+                violations.push('AI Personalization requires Data Lakehouse');
+            }
+            
+            if (decisions.serviceNetwork === 'predictive' && 
+                !['lakehouse', 'warehouse'].includes(decisions.dataPlatform)) {
+                violations.push('Predictive Planning requires Data Lakehouse OR Traditional Data Warehouse');
+            }
+            
+            if (violations.length > 0) {
+                warningDiv.style.display = 'block';
+                document.getElementById('dependencyMessage').innerHTML = violations.join('<br>');
+                document.getElementById('submitBtn').disabled = true;
+            } else {
+                warningDiv.style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+
+        function getCurrentDecisions() {
+            const decisions = {};
+            
+            document.querySelectorAll(`input[type="radio"]:checked`).forEach(radio => {
+                if (radio.name.includes(`year${currentYear}`)) {
+                    const category = radio.name.replace(`_year${currentYear}`, '');
+                    decisions[category] = radio.value;
+                }
+            });
+            
+            return decisions;
+        }
+
+        function restoreDecisions(decisions) {
+            Object.keys(decisions).forEach(category => {
+                if (decisions[category] && decisions[category].value) {
+                    const radioName = `${category}_year${currentYear}`;
+                    const radio = document.querySelector(`input[name="${radioName}"][value="${decisions[category].value}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        radio.closest('.decision-option').classList.add('selected');
+                    }
+                }
+            });
+            
+            updateBudgetDisplay();
+            checkDependencies();
+        }
+
+        function saveProgress() {
+            const decisions = getCurrentDecisions();
+            let totalCost = 0;
+            
+            document.querySelectorAll(`input[type="radio"]:checked`).forEach(radio => {
+                if (radio.name.includes(`year${currentYear}`)) {
+                    totalCost += parseInt(radio.dataset.cost);
+                }
+            });
+            
+            // Convert decisions to include cost data
+            const decisionsWithCosts = {};
+            Object.keys(decisions).forEach(category => {
+                const radio = document.querySelector(`input[name="${category}_year${currentYear}"][value="${decisions[category]}"]`);
+                if (radio) {
+                    decisionsWithCosts[category] = {
+                        value: decisions[category],
+                        cost: parseInt(radio.dataset.cost)
+                    };
+                }
+            });
+            
+            const saveData = {
+                [`decisions/year${currentYear}`]: {
+                    ...decisionsWithCosts,
+                    timestamp: new Date().toISOString(),
+                    totalCost: totalCost
+                },
+                [`totalBudgetUsed/year${currentYear}`]: totalCost,
+                currentYear: currentYear
+            };
+            
+            database.ref(`teams/${currentTeam}`).update(saveData).then(() => {
+                document.getElementById('lastSaveTime').textContent = new Date().toLocaleTimeString();
+                
+                // Visual feedback
+                const saveBtn = document.getElementById('saveBtn');
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = '✓ Saved!';
+                saveBtn.style.background = '#27ae60';
+                
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.style.background = '#3498db';
+                }, 2000);
+            });
+        }
+
+        function submitYear() {
+            const decisions = getCurrentDecisions();
+            let totalCost = 0;
+            
+            // Validate budget
+            document.querySelectorAll(`input[type="radio"]:checked`).forEach(radio => {
+                if (radio.name.includes(`year${currentYear}`)) {
+                    totalCost += parseInt(radio.dataset.cost);
+                }
+            });
+            
+            if (totalCost > 100) {
+                alert('Budget exceeded! Please reduce your selections to stay within ₹100 Cr.');
+                return;
+            }
+            
+            // Check all categories are selected
+            const requiredCategories = ['smartFactory', 'qualitySystem', 'customerJourney', 'serviceNetwork', 
+                                      'erpStrategy', 'dataPlatform', 'iotTelemetry', 'businessIntelligence', 
+                                      'brandPositioning', 'marketingTech', 'cloudStrategy', 'security'];
+            
+            const missingCategories = requiredCategories.filter(cat => !decisions[cat]);
+            
+            if (missingCategories.length > 0) {
+                alert(`Please make decisions for all categories. Missing: ${missingCategories.join(', ')}`);
+                return;
+            }
+            
+            // Save and proceed
+            saveProgress().then(() => {
+                // Calculate KPIs (simplified for demo)
+                const kpis = calculateKPIs(decisions, currentYear);
+                
+                database.ref(`teams/${currentTeam}/kpiResults/year${currentYear}`).set(kpis);
+                
+                // Trigger market events
+                triggerMarketEvents(currentYear);
+                
+                // Move to next year or show results
+                if (currentYear < 4) {
+                    currentYear++;
+                    database.ref(`teams/${currentTeam}/currentYear`).set(currentYear);
+                    switchToYear(currentYear);
+                } else {
+                    // Show final results
+                    showFinalResults();
+                }
+            });
+        }
+
+        function calculateKPIs(decisions, year) {
+            // Simplified KPI calculation for demo
+            let marketShare = 5; // Base 5%
+            let revenue = 800; // Base ₹800Cr
+            let profitability = 0; // Base 0%
+            let customerSatisfaction = 60; // Base 60%
+            let roic = 10; // Base 10%
+            
+            // Apply decision impacts
+            if (decisions.qualitySystem === 'automated') {
+                marketShare += 1;
+                customerSatisfaction += 12;
+                profitability += 8;
+            }
+            
+            if (decisions.customerJourney === 'omnichannel') {
+                marketShare += 3;
+                revenue += 64; // 8% increase
+                customerSatisfaction += 18;
+            }
+            
+            if (decisions.brandPositioning === 'tesla') {
+                if (year > 1) { // Delayed effect
+                    marketShare += 4;
+                    revenue += 120; // 15% increase (delayed)
+                    customerSatisfaction += 20;
+                    profitability -= 12; // High initial investment
+                }
+            }
+            
+            // Add more calculation logic based on documentation...
+            
+            return {
+                marketShare: Math.round(marketShare * 10) / 10,
+                revenue: Math.round(revenue),
+                profitability: Math.round(profitability * 10) / 10,
+                customerSatisfaction: Math.round(customerSatisfaction),
+                roic: Math.round(roic * 10) / 10
+            };
+        }
+
+        function triggerMarketEvents(year) {
+            // Simplified market events for demo
+            const events = {
+                1: [
+                    {
+                        title: "Global Semiconductor Crisis Intensifies",
+                        description: "Chip shortage affects all manufacturing",
+                        impact: "Industry 4.0 projects delayed 6 months, Status Quo gains advantage"
+                    }
+                ]
+            };
+            
+            if (events[year]) {
+                database.ref(`teams/${currentTeam}/marketEvents/year${year}`).set(events[year]);
+            }
+        }
+
+        function showFinalResults() {
+            // Mark game as completed
+            database.ref(`teams/${currentTeam}/gameCompleted`).set(true);
+            
+            // Show results section
+            document.getElementById('finalResults').classList.add('show');
+            
+            // Calculate and display final scores
+            // This would integrate with the full KPI calculation system
+        }
+
+        function updateYearTabs() {
+            document.querySelectorAll('.year-tab').forEach(tab => {
+                const year = parseInt(tab.dataset.year);
+                if (year < currentYear) {
+                    tab.classList.add('completed');
+                } else if (year === currentYear) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                if (getCurrentDecisions() && Object.keys(getCurrentDecisions()).length > 0) {
+                    saveProgress();
+                }
+            }, 30000); // Auto-save every 30 seconds
+        }
+
+        function goBack() {
+            if (confirm('Are you sure you want to return to the landing page? Any unsaved progress will be lost.')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeGame);
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+        });
+    </script>
+</body>
+</html>

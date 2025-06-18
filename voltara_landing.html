@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltara Motors: 4-Year Strategy Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 1000px;
+            padding: 2rem;
+        }
+
+        .game-header {
+            margin-bottom: 3rem;
+        }
+
+        .game-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .timer-display {
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .timer-display #gameTimer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .game-status {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            color: #ffeb3b;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .team-button {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .team-button:active {
+            transform: translateY(-2px);
+        }
+
+        .team-button .team-name {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-button .team-status {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .admin-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .admin-button {
+            background: rgba(255,87,34,0.8);
+            border: 2px solid rgba(255,87,34,1);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-button:hover {
+            background: rgba(255,87,34,1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,87,34,0.4);
+        }
+
+        .game-info {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .game-info h3 {
+            margin-bottom: 1rem;
+            color: #ffeb3b;
+        }
+
+        .game-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .game-info li {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .game-info li:before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .timer-display #gameTimer {
+                font-size: 2rem;
+            }
+            
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-header">
+            <h1>VOLTARA MOTORS</h1>
+            <p class="subtitle">4-Year Strategic Business Simulation</p>
+            
+            <div class="timer-display">
+                <div id="gameTimer">20:00</div>
+            </div>
+            
+            <div class="game-status">
+                <span id="gameStatus">Waiting to Start</span>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <h3>Game Overview</h3>
+            <ul>
+                <li><strong>Duration:</strong> 20 minutes total gameplay</li>
+                <li><strong>Teams:</strong> 10 competing teams (3-5 people recommended per team)</li>
+                <li><strong>Budget:</strong> ₹100 Crores per year across 4 years</li>
+                <li><strong>Objective:</strong> Achieve highest combined KPI score across Market Share, Revenue, Profitability, Customer Satisfaction, and ROIC</li>
+                <li><strong>Strategy:</strong> Make DIT decisions across 6 categories annually while navigating market events</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-bottom: 2rem;">Select Your Team</h2>
+        
+        <div class="team-grid" id="teamGrid">
+            <button class="team-button" onclick="joinTeam('team1')">
+                <div class="team-name">Alpha Automotive</div>
+                <div class="team-status" id="status-team1">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team2')">
+                <div class="team-name">Beta Motors</div>
+                <div class="team-status" id="status-team2">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team3')">
+                <div class="team-name">Gamma Vehicles</div>
+                <div class="team-status" id="status-team3">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team4')">
+                <div class="team-name">Delta Drive</div>
+                <div class="team-status" id="status-team4">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team5')">
+                <div class="team-name">Epsilon Electric</div>
+                <div class="team-status" id="status-team5">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team6')">
+                <div class="team-name">Zeta Motors</div>
+                <div class="team-status" id="status-team6">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team7')">
+                <div class="team-name">Eta Engines</div>
+                <div class="team-status" id="status-team7">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team8')">
+                <div class="team-name">Theta Transport</div>
+                <div class="team-status" id="status-team8">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team9')">
+                <div class="team-name">Iota Industries</div>
+                <div class="team-status" id="status-team9">Ready to Start</div>
+            </button>
+            
+            <button class="team-button" onclick="joinTeam('team10')">
+                <div class="team-name">Kappa Cars</div>
+                <div class="team-status" id="status-team10">Ready to Start</div>
+            </button>
+        </div>
+
+        <div class="admin-section">
+            <button class="admin-button" onclick="openAdmin()">
+                🎮 Admin Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration - Replace with your config
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "your-project-id.firebaseapp.com",
+            databaseURL: "https://your-project-id-default-rtdb.firebaseio.com/",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Team names mapping
+        const teamNames = {
+            team1: "Alpha Automotive",
+            team2: "Beta Motors", 
+            team3: "Gamma Vehicles",
+            team4: "Delta Drive",
+            team5: "Epsilon Electric",
+            team6: "Zeta Motors",
+            team7: "Eta Engines",
+            team8: "Theta Transport",
+            team9: "Iota Industries",
+            team10: "Kappa Cars"
+        };
+
+        // Initialize game state
+        function initializeGame() {
+            // Listen for game settings changes
+            database.ref('gameSettings').on('value', (snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    updateTimerDisplay(settings);
+                    updateGameStatus(settings);
+                }
+            });
+
+            // Listen for team status updates
+            database.ref('teams').on('value', (snapshot) => {
+                const teams = snapshot.val() || {};
+                updateTeamStatuses(teams);
+            });
+
+            // Initialize default game settings if not exists
+            database.ref('gameSettings').once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    database.ref('gameSettings').set({
+                        isActive: true,
+                        timerStarted: false,
+                        timerDuration: 1200, // 20 minutes
+                        startTime: null,
+                        teamNames: teamNames
+                    });
+                }
+            });
+        }
+
+        function updateTimerDisplay(settings) {
+            const timerElement = document.getElementById('gameTimer');
+            
+            if (settings.timerStarted && settings.startTime) {
+                // Calculate remaining time
+                const elapsed = (Date.now() - settings.startTime) / 1000;
+                const remaining = Math.max(0, settings.timerDuration - elapsed);
+                
+                const minutes = Math.floor(remaining / 60);
+                const seconds = Math.floor(remaining % 60);
+                
+                timerElement.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 0) {
+                    document.getElementById('gameStatus').textContent = 'Game Completed';
+                }
+            } else {
+                timerElement.textContent = '20:00';
+            }
+        }
+
+        function updateGameStatus(settings) {
+            const statusElement = document.getElementById('gameStatus');
+            
+            if (!settings.timerStarted) {
+                statusElement.textContent = 'Waiting to Start';
+            } else {
+                statusElement.textContent = 'Game in Progress';
+            }
+        }
+
+        function updateTeamStatuses(teams) {
+            Object.keys(teamNames).forEach(teamId => {
+                const statusElement = document.getElementById(`status-${teamId}`);
+                
+                if (teams[teamId]) {
+                    const team = teams[teamId];
+                    if (team.gameCompleted) {
+                        statusElement.textContent = 'Completed';
+                        statusElement.style.color = '#4caf50';
+                    } else {
+                        statusElement.textContent = `Year ${team.currentYear || 1}`;
+                        statusElement.style.color = '#ffeb3b';
+                    }
+                } else {
+                    statusElement.textContent = 'Ready to Start';
+                    statusElement.style.color = '#ffffff';
+                }
+            });
+        }
+
+        function joinTeam(teamId) {
+            // Check if game is active
+            database.ref('gameSettings/isActive').once('value').then((snapshot) => {
+                if (snapshot.val()) {
+                    // Initialize team if not exists
+                    database.ref(`teams/${teamId}`).once('value').then((teamSnapshot) => {
+                        if (!teamSnapshot.exists()) {
+                            database.ref(`teams/${teamId}`).set({
+                                name: teamNames[teamId],
+                                currentYear: 1,
+                                gameCompleted: false,
+                                totalBudgetUsed: {
+                                    year1: 0,
+                                    year2: 0,
+                                    year3: 0,
+                                    year4: 0
+                                },
+                                decisions: {},
+                                marketEvents: {},
+                                courseCorrections: {},
+                                kpiResults: {},
+                                finalScore: null
+                            });
+                        }
+                        
+                        // Redirect to game page
+                        window.location.href = `game.html?team=${teamId}`;
+                    });
+                } else {
+                    alert('Game is currently inactive. Please contact the administrator.');
+                }
+            });
+        }
+
+        function openAdmin() {
+            window.location.href = 'admin.html';
+        }
+
+        // Update timer every second
+        setInterval(() => {
+            database.ref('gameSettings').once('value').then((snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    updateTimerDisplay(settings);
+                }
+            });
+        }, 1000);
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voltara Motors - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .timer-display {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .control-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.danger {
+            background: #e74c3c;
+        }
+
+        .control-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .control-btn.success {
+            background: #27ae60;
+        }
+
+        .control-btn.success:hover {
+            background: #229954;
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .team-card {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .team-card.completed {
+            border-color: #27ae60;
+            background: #eafaf1;
+        }
+
+        .team-card.active {
+            border-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .team-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .team-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-waiting {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .status-active {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .team-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .team-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .team-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .team-btn.primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .team-btn.secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .teams-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .teams-table th,
+        .teams-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .teams-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .teams-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+
+        .live-decisions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .decision-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #3498db;
+        }
+
+        .decision-team {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .decision-category {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.25rem;
+        }
+
+        .decision-choice {
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .rankings-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .rank-position {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+            min-width: 40px;
+        }
+
+        .rank-position.first {
+            color: #f1c40f;
+        }
+
+        .rank-position.second {
+            color: #95a5a6;
+        }
+
+        .rank-position.third {
+            color: #cd7f32;
+        }
+
+        .rank-details {
+            flex-grow: 1;
+            margin-left: 1rem;
+        }
+
+        .rank-team {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .rank-strategy {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .rank-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .timer-controls {
+                justify-content: center;
+            }
+
+            .teams-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .teams-table {
+                font-size: 0.9rem;
+            }
+
+            .teams-table th,
+            .teams-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1>🎮 Admin Dashboard</h1>
+                <p>Voltara Motors Strategy Simulation</p>
+            </div>
+            
+            <div class="timer-controls">
+                <div class="timer-display" id="gameTimer">20:00</div>
+                <button class="control-btn success" onclick="startGame()" id="startBtn">▶ Start Game</button>
+                <button class="control-btn" onclick="pauseGame()" id="pauseBtn">⏸ Pause</button>
+                <button class="control-btn danger" onclick="resetGame()">🔄 Reset Game</button>
+            </div>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="activeTeams">0</div>
+                <div class="stat-label">Active Teams</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number" id="completedTeams">0</div>
+                <div class="stat-label">Completed Teams</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number" id="averageProgress">0%</div>
+                <div class="stat-label">Average Progress</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number" id="gameStatus">Waiting</div>
+                <div class="stat-label">Game Status</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Team Overview</h2>
+            <div class="teams-grid" id="teamsGrid">
+                <!-- Team cards will be dynamically generated -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Detailed Team Progress</h2>
+            <table class="teams-table">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Current Year</th>
+                        <th>Budget Used</th>
+                        <th>Market Share</th>
+                        <th>Revenue</th>
+                        <th>Profitability</th>
+                        <th>Customer Sat</th>
+                        <th>ROIC</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teamsTableBody">
+                    <!-- Table rows will be dynamically generated -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🔴 Live Decision Tracking</h2>
+            <div class="live-decisions" id="liveDecisions">
+                <!-- Live decision updates will appear here -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏆 Current Rankings</h2>
+            <div class="rankings-container" id="rankingsContainer">
+                <!-- Rankings will be calculated and displayed here -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌍 Market Events Management</h2>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button class="control-btn" onclick="triggerMarketEvent()">Trigger Custom Event</button>
+                <button class="control-btn" onclick="viewEventHistory()">View Event History</button>
+            </div>
+            <div id="marketEventsStatus">
+                <p>Market events will trigger automatically based on game progression and team decisions.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Detail Modal -->
+    <div class="modal" id="teamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTeamName">Team Details</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalContent">
+                <!-- Team details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "your-project-id.firebaseapp.com",
+            databaseURL: "https://your-project-id-default-rtdb.firebaseio.com/",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global state
+        let gameSettings = {};
+        let teamsData = {};
+        let timerInterval = null;
+
+        // Team names mapping
+        const teamNames = {
+            team1: "Alpha Automotive",
+            team2: "Beta Motors", 
+            team3: "Gamma Vehicles",
+            team4: "Delta Drive",
+            team5: "Epsilon Electric",
+            team6: "Zeta Motors",
+            team7: "Eta Engines",
+            team8: "Theta Transport",
+            team9: "Iota Industries",
+            team10: "Kappa Cars"
+        };
+
+        // Initialize admin dashboard
+        function initializeAdmin() {
+            // Listen for game settings changes
+            database.ref('gameSettings').on('value', (snapshot) => {
+                gameSettings = snapshot.val() || {};
+                updateGameStatus();
+                updateTimer();
+            });
+
+            // Listen for team data changes
+            database.ref('teams').on('value', (snapshot) => {
+                teamsData = snapshot.val() || {};
+                updateTeamsDisplay();
+                updateStatistics();
+                updateRankings();
+                updateLiveDecisions();
+            });
+
+            // Initialize default settings if needed
+            initializeGameSettings();
+            
+            // Start timer update interval
+            startTimerUpdate();
+        }
+
+        function initializeGameSettings() {
+            database.ref('gameSettings').once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    const defaultSettings = {
+                        isActive: true,
+                        timerStarted: false,
+                        timerDuration: 1200, // 20 minutes
+                        startTime: null,
+                        teamNames: teamNames
+                    };
+                    database.ref('gameSettings').set(defaultSettings);
+                }
+            });
+        }
+
+        function updateGameStatus() {
+            const statusElement = document.getElementById('gameStatus');
+            
+            if (!gameSettings.timerStarted) {
+                statusElement.textContent = 'Waiting';
+                statusElement.style.color = '#f39c12';
+            } else {
+                statusElement.textContent = 'Active';
+                statusElement.style.color = '#27ae60';
+            }
+        }
+
+        function updateTimer() {
+            const timerElement = document.getElementById('gameTimer');
+            
+            if (gameSettings.timerStarted && gameSettings.startTime) {
+                const elapsed = (Date.now() - gameSettings.startTime) / 1000;
+                const remaining = Math.max(0, gameSettings.timerDuration - elapsed);
+                
+                const minutes = Math.floor(remaining / 60);
+                const seconds = Math.floor(remaining % 60);
+                
+                timerElement.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 0) {
+                    handleGameEnd();
+                }
+            } else {
+                timerElement.textContent = '20:00';
+            }
+        }
+
+        function startTimerUpdate() {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTeamsDisplay() {
+            updateTeamsGrid();
+            updateTeamsTable();
+        }
+
+        function updateTeamsGrid() {
+            const grid = document.getElementById('teamsGrid');
+            grid.innerHTML = '';
+
+            Object.keys(teamNames).forEach(teamId => {
+                const team = teamsData[teamId] || {};
+                const card = createTeamCard(teamId, team);
+                grid.appendChild(card);
+            });
+        }
+
+        function createTeamCard(teamId, teamData) {
+            const card = document.createElement('div');
+            card.className = 'team-card';
+            
+            if (teamData.gameCompleted) {
+                card.classList.add('completed');
+            } else if (teamData.currentYear > 1) {
+                card.classList.add('active');
+            }
+            
+            const currentKPIs = teamData.kpiResults ? 
+                teamData.kpiResults[`year${teamData.currentYear || 1}`] : {};
+            
+            card.innerHTML = `
+                <div class="team-header">
+                    <div class="team-name">${teamNames[teamId]}</div>
+                    <div class="team-status ${getStatusClass(teamData)}">
+                        ${getStatusText(teamData)}
+                    </div>
+                </div>
+                
+                <div class="team-metrics">
+                    <div class="metric">
+                        <div class="metric-label">Year</div>
+                        <div class="metric-value">${teamData.currentYear || 1}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Budget</div>
+                        <div class="metric-value">₹${teamData.totalBudgetUsed ? 
+                            teamData.totalBudgetUsed[`year${teamData.currentYear || 1}`] || 0 : 0}Cr</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Market Share</div>
+                        <div class="metric-value">${currentKPIs.marketShare || 0}%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Revenue</div>
+                        <div class="metric-value">₹${currentKPIs.revenue || 0}Cr</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${getProgressPercentage(teamData)}%"></div>
+                </div>
+                
+                <div class="team-actions">
+                    <button class="team-btn primary" onclick="viewTeamDetails('${teamId}')">
+                        View Details
+                    </button>
+                    <button class="team-btn secondary" onclick="monitorTeam('${teamId}')">
+                        Monitor Live
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function updateTeamsTable() {
+            const tbody = document.getElementById('teamsTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(teamNames).forEach(teamId => {
+                const team = teamsData[teamId] || {};
+                const row = createTeamRow(teamId, team);
+                tbody.appendChild(row);
+            });
+        }
+
+        function createTeamRow(teamId, teamData) {
+            const row = document.createElement('tr');
+            
+            const currentKPIs = teamData.kpiResults ? 
+                teamData.kpiResults[`year${teamData.currentYear || 1}`] : {};
+            
+            row.innerHTML = `
+                <td><strong>${teamNames[teamId]}</strong></td>
+                <td>Year ${teamData.currentYear || 1}</td>
+                <td>₹${teamData.totalBudgetUsed ? 
+                    teamData.totalBudgetUsed[`year${teamData.currentYear || 1}`] || 0 : 0}Cr</td>
+                <td>${currentKPIs.marketShare || 0}%</td>
+                <td>₹${currentKPIs.revenue || 0}Cr</td>
+                <td>${currentKPIs.profitability || 0}%</td>
+                <td>${currentKPIs.customerSatisfaction || 0}%</td>
+                <td>${currentKPIs.roic || 0}%</td>
+                <td><span class="team-status ${getStatusClass(teamData)}">${getStatusText(teamData)}</span></td>
+                <td>
+                    <button class="team-btn primary" onclick="viewTeamDetails('${teamId}')">
+                        Details
+                    </button>
+                </td>
+            `;
+            
+            return row;
+        }
+
+        function getStatusClass(teamData) {
+            if (teamData.gameCompleted) return 'status-completed';
+            if (teamData.currentYear > 1) return 'status-active';
+            return 'status-waiting';
+        }
+
+        function getStatusText(teamData) {
+            if (teamData.gameCompleted) return 'Completed';
+            if (teamData.currentYear > 1) return 'In Progress';
+            return 'Waiting';
+        }
+
+        function getProgressPercentage(teamData) {
+            if (teamData.gameCompleted) return 100;
+            return ((teamData.currentYear || 1) - 1) * 25;
+        }
+
+        function updateStatistics() {
+            const totalTeams = Object.keys(teamNames).length;
+            const activeTeams = Object.values(teamsData).filter(team => 
+                team.currentYear > 1 && !team.gameCompleted).length;
+            const completedTeams = Object.values(teamsData).filter(team => 
+                team.gameCompleted).length;
+            
+            let totalProgress = 0;
+            Object.values(teamsData).forEach(team => {
+                totalProgress += getProgressPercentage(team);
+            });
+            const averageProgress = Math.round(totalProgress / totalTeams);
+
+            document.getElementById('activeTeams').textContent = activeTeams;
+            document.getElementById('completedTeams').textContent = completedTeams;
+            document.getElementById('averageProgress').textContent = `${averageProgress}%`;
+        }
+
+        function updateRankings() {
+            const rankingsContainer = document.getElementById('rankingsContainer');
+            
+            // Calculate scores for completed teams
+            const rankedTeams = Object.keys(teamsData)
+                .filter(teamId => teamsData[teamId].gameCompleted)
+                .map(teamId => {
+                    const team = teamsData[teamId];
+                    const score = calculateFinalScore(team);
+                    return { teamId, team, score };
+                })
+                .sort((a, b) => b.score - a.score);
+
+            if (rankedTeams.length === 0) {
+                rankingsContainer.innerHTML = '<p>No teams have completed the simulation yet.</p>';
+                return;
+            }
+
+            rankingsContainer.innerHTML = rankedTeams.map((item, index) => `
+                <div class="ranking-item">
+                    <div class="rank-position ${getRankClass(index + 1)}">${index + 1}</div>
+                    <div class="rank-details">
+                        <div class="rank-team">${teamNames[item.teamId]}</div>
+                        <div class="rank-strategy">${getTeamStrategy(item.team)}</div>
+                    </div>
+                    <div class="rank-score">${item.score}</div>
+                </div>
+            `).join('');
+        }
+
+        function calculateFinalScore(teamData) {
+            // Simplified scoring - would use full KPI calculation from documentation
+            if (!teamData.kpiResults || !teamData.kpiResults.year4) return 0;
+            
+            const kpis = teamData.kpiResults.year4;
+            const score = 
+                (kpis.marketShare || 0) * 0.2 +
+                (kpis.revenue || 0) * 0.001 * 0.25 + // Scale revenue to percentage
+                (kpis.profitability || 0) * 0.25 +
+                (kpis.customerSatisfaction || 0) * 0.15 +
+                (kpis.roic || 0) * 0.15;
+            
+            return Math.round(score);
+        }
+
+        function getRankClass(position) {
+            if (position === 1) return 'first';
+            if (position === 2) return 'second';
+            if (position === 3) return 'third';
+            return '';
+        }
+
+        function getTeamStrategy(teamData) {
+            // Analyze team decisions to determine strategy
+            if (!teamData.decisions || !teamData.decisions.year1) return 'Unknown Strategy';
+            
+            const decisions = teamData.decisions.year1;
+            
+            if (decisions.brandPositioning && decisions.brandPositioning.value === 'tesla') {
+                return 'Urban Pioneer Strategy';
+            } else if (decisions.brandPositioning && decisions.brandPositioning.value === 'value') {
+                return 'Value Leader Strategy';
+            } else if (decisions.brandPositioning && decisions.brandPositioning.value === 'toyota') {
+                return 'B2B Foundation Strategy';
+            }
+            
+            return 'Hybrid Strategy';
+        }
+
+        function updateLiveDecisions() {
+            const container = document.getElementById('liveDecisions');
+            container.innerHTML = '';
+
+            // Show recent decision changes
+            Object.keys(teamsData).forEach(teamId => {
+                const team = teamsData[teamId];
+                if (team.decisions && team.decisions[`year${team.currentYear || 1}`]) {
+                    const decisions = team.decisions[`year${team.currentYear || 1}`];
+                    
+                    Object.keys(decisions).forEach(category => {
+                        if (decisions[category] && decisions[category].value && category !== 'timestamp' && category !== 'totalCost') {
+                            const card = document.createElement('div');
+                            card.className = 'decision-card';
+                            card.innerHTML = `
+                                <div class="decision-team">${teamNames[teamId]}</div>
+                                <div class="decision-category">${formatCategoryName(category)}</div>
+                                <div class="decision-choice">${formatDecisionValue(decisions[category].value)} (₹${decisions[category].cost}Cr)</div>
+                            `;
+                            container.appendChild(card);
+                        }
+                    });
+                }
+            });
+
+            if (container.children.length === 0) {
+                container.innerHTML = '<p>No recent decisions to display.</p>';
+            }
+        }
+
+        function formatCategoryName(category) {
+            const names = {
+                'smartFactory': 'Smart Factory',
+                'qualitySystem': 'Quality System',
+                'customerJourney': 'Customer Journey',
+                'serviceNetwork': 'Service Network',
+                'erpStrategy': 'ERP Strategy',
+                'dataPlatform': 'Data Platform',
+                'iotTelemetry': 'IoT & Telemetry',
+                'businessIntelligence': 'Business Intelligence',
+                'brandPositioning': 'Brand Positioning',
+                'marketingTech': 'Marketing Tech',
+                'cloudStrategy': 'Cloud Strategy',
+                'security': 'Security'
+            };
+            return names[category] || category;
+        }
+
+        function formatDecisionValue(value) {
+            const values = {
+                'industry4': 'Industry 4.0',
+                'incremental': 'Incremental Automation',
+                'legacy': 'Legacy Systems',
+                'automated': 'Automated QC',
+                'hybrid': 'Hybrid Approach',
+                'manual': 'Manual',
+                'omnichannel': 'Omnichannel',
+                'channelSpecific': 'Channel-Specific',
+                'basic': 'Basic',
+                'predictive': 'Predictive',
+                'reactive': 'Reactive',
+                'scheduled': 'Scheduled',
+                'sapRise': 'SAP RISE',
+                'sapOnPrem': 'SAP On-Premise',
+                'lakehouse': 'Data Lakehouse',
+                'warehouse': 'Data Warehouse',
+                'realtime': 'Real-time Data',
+                'none': 'None',
+                'generative': 'Generative BI',
+                'standard': 'Standard BI',
+                'tesla': 'Tesla-like Innovation',
+                'toyota': 'Toyota-like Reliability',
+                'value': 'Value Leadership',
+                'aiPersonalization': 'AI Personalization',
+                'traditional': 'Traditional Digital',
+                'wordOfMouth': 'Word-of-Mouth',
+                'multiCloud': 'Multi-cloud',
+                'singleCloud': 'Single Cloud',
+                'onPremise': 'On-premise',
+                'zeroTrust': 'Zero-trust',
+                'perimeter': 'Perimeter Security'
+            };
+            return values[value] || value;
+        }
+
+        // Game control functions
+        function startGame() {
+            if (gameSettings.timerStarted) {
+                alert('Game is already running!');
+                return;
+            }
+
+            const confirmStart = confirm('Start the 20-minute simulation for all teams?');
+            if (confirmStart) {
+                database.ref('gameSettings').update({
+                    timerStarted: true,
+                    startTime: Date.now()
+                });
+                
+                document.getElementById('startBtn').style.background = '#95a5a6';
+                document.getElementById('startBtn').textContent = '⏸ Running';
+            }
+        }
+
+        function pauseGame() {
+            if (!gameSettings.timerStarted) {
+                alert('Game is not running!');
+                return;
+            }
+
+            database.ref('gameSettings/timerStarted').set(false);
+            
+            document.getElementById('startBtn').style.background = '#27ae60';
+            document.getElementById('startBtn').textContent = '▶ Resume';
+        }
+
+        function resetGame() {
+            const confirmReset = confirm(
+                'Are you sure you want to reset the entire game?\n\n' +
+                'This will:\n' +
+                '• Delete all team progress\n' +
+                '• Reset the timer\n' +
+                '• Clear all decisions and results\n\n' +
+                'This action cannot be undone!'
+            );
+            
+            if (confirmReset) {
+                // Reset game settings
+                database.ref('gameSettings').set({
+                    isActive: true,
+                    timerStarted: false,
+                    timerDuration: 1200,
+                    startTime: null,
+                    teamNames: teamNames
+                });
+                
+                // Clear all team data
+                database.ref('teams').remove();
+                
+                alert('Game has been reset successfully!');
+                
+                // Reset UI
+                document.getElementById('startBtn').style.background = '#27ae60';
+                document.getElementById('startBtn').textContent = '▶ Start Game';
+            }
+        }
+
+        function handleGameEnd() {
+            // Auto-submit all incomplete teams
+            Object.keys(teamsData).forEach(teamId => {
+                const team = teamsData[teamId];
+                if (!team.gameCompleted) {
+                    database.ref(`teams/${teamId}/gameCompleted`).set(true);
+                    database.ref(`teams/${teamId}/autoSubmitted`).set(true);
+                }
+            });
+            
+            alert('Game time has expired! All teams have been auto-submitted.');
+        }
+
+        // Modal functions
+        function viewTeamDetails(teamId) {
+            const team = teamsData[teamId] || {};
+            const modal = document.getElementById('teamModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            document.getElementById('modalTeamName').textContent = teamNames[teamId];
+            
+            modalContent.innerHTML = generateTeamDetailHTML(teamId, team);
+            modal.style.display = 'block';
+        }
+
+        function generateTeamDetailHTML(teamId, teamData) {
+            let html = `<h3>Team Overview</h3>`;
+            html += `<p><strong>Current Year:</strong> ${teamData.currentYear || 1}</p>`;
+            html += `<p><strong>Game Status:</strong> ${getStatusText(teamData)}</p>`;
+            
+            if (teamData.decisions) {
+                html += `<h3>Decisions by Year</h3>`;
+                Object.keys(teamData.decisions).forEach(year => {
+                    html += `<h4>${year.toUpperCase()}</h4>`;
+                    const decisions = teamData.decisions[year];
+                    Object.keys(decisions).forEach(category => {
+                        if (category !== 'timestamp' && category !== 'totalCost' && decisions[category]) {
+                            html += `<p><strong>${formatCategoryName(category)}:</strong> ${formatDecisionValue(decisions[category].value)} (₹${decisions[category].cost}Cr)</p>`;
+                        }
+                    });
+                });
+            }
+            
+            if (teamData.kpiResults) {
+                html += `<h3>KPI Results</h3>`;
+                Object.keys(teamData.kpiResults).forEach(year => {
+                    html += `<h4>${year.toUpperCase()}</h4>`;
+                    const kpis = teamData.kpiResults[year];
+                    html += `
+                        <p><strong>Market Share:</strong> ${kpis.marketShare || 0}%</p>
+                        <p><strong>Revenue:</strong> ₹${kpis.revenue || 0}Cr</p>
+                        <p><strong>Profitability:</strong> ${kpis.profitability || 0}%</p>
+                        <p><strong>Customer Satisfaction:</strong> ${kpis.customerSatisfaction || 0}%</p>
+                        <p><strong>ROIC:</strong> ${kpis.roic || 0}%</p>
+                    `;
+                });
+            }
+            
+            return html;
+        }
+
+        function closeModal() {
+            document.getElementById('teamModal').style.display = 'none';
+        }
+
+        function monitorTeam(teamId) {
+            // Open the team's game page in a new tab for live monitoring
+            window.open(`game.html?team=${teamId}`, '_blank');
+        }
+
+        function triggerMarketEvent() {
+            alert('Custom market event triggering feature - to be implemented based on specific requirements.');
+        }
+
+        function viewEventHistory() {
+            alert('Market event history viewer - to be implemented.');
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('teamModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeAdmin);
+    </script>
+</body>
+</html>
